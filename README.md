@@ -1,4 +1,4 @@
-# 万花筒
+# kaleidoscope
 
 > [WIP] Rust LLVM 中文教程
 
