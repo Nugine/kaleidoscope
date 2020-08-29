@@ -1,0 +1,42 @@
+name: Deploy
+on:
+  push:
+    branches:
+      master
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+
+      - name: Cache cargo bin
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo/bin
+          key: ${{ runner.os }}-cargo-bin-${{ hashFiles('~/.cargo/.crates2.json') }}
+      
+      - name: Install mdbook
+        run: |
+          (test -x ~/.cargo/bin/mdbook || cargo install mdbook)
+          mdbook -V
+      
+      - name: Render
+        run: |
+          cd kaleidoscope
+          mdbook build
+          cd ..
+
+      - name: Debug
+        run: |
+          ls kaleidoscope/book
+
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@releases/v3
+        with:
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          BRANCH: gh-pages
+          FOLDER: kaleidoscope/book
+          CLEAN: true
